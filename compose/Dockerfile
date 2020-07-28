@@ -6,10 +6,15 @@ COPY go.mod go.sum ./
 
 RUN go mod download
 
+ENV GOPATH=/application/.go
 
 ADD . /application
 
 #RUN go get /application/...
-RUN go build -o /application/build/aviasales .
+RUN go build -o /application/build/aviasales /application/src/main.go
 
-CMD ["/appication/build/aviasales"]
+RUN ls /application
+
+RUN ls /application/build
+
+CMD ["./build/aviasales"]
