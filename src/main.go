@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -9,9 +8,31 @@ import (
 
 	"aviasales/src/cities"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 var router *gin.Engine
+
+func init() {
+	log.SetFormatter(&log.JSONFormatter{})
+
+	if _, err := os.Stat("logs"); os.IsNotExist(err) {
+		err := os.Mkdir("logs", 0777)
+		if err != nil {
+		}
+	}
+
+	file, err := os.OpenFile("logs/travelpayouts.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err == nil {
+		log.SetOutput(file)
+		log.WithFields(log.Fields{
+			"package": "main",
+		}).Info("Initializing logger are successful!")
+	} else {
+		log.SetOutput(os.Stdout)
+		log.Warning("Failed to log to file, using default stderr")
+	}
+}
 
 func main() {
 	router = gin.Default()
@@ -27,13 +48,18 @@ func main() {
 
 	go func() {
 		if err := server.ListenAndServe(); err != nil {
-			fmt.Printf("listen: %s\n", err)
+			log.WithFields(log.Fields{
+				"package": "main",
+			}).Panic("Web Server can`t start listen!")
 		}
 	}()
 
 	quit := make(chan os.Signal)
 	signal.Notify(quit, syscall.SIGQUIT, os.Interrupt)
 	<-quit
+	cities.StopTasks()
 
-	fmt.Println("Shutdown Server ...")
+	log.WithFields(log.Fields{
+		"package": "main",
+	}).Info("Initializing logger are successful!")
 }

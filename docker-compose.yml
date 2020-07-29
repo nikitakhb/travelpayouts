@@ -4,5 +4,11 @@ services:
     build:
       context: .
       dockerfile: compose/Dockerfile
+    environment:
+      - TASK_UPDATE_PERIOD=600 # Интервал в секундах опроса travelpayouts.
+      - API_URL=https://suggest.travelpayouts.com/data_api?service=random_city_sample&no-cache=true # Ендпоинт данных.
+      - GIN_MODE=release
     ports:
-    - "80:8080"
+      - "80:8080"
+    volumes:
+      - ./etc/logs:/application/logs
